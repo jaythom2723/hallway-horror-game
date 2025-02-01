@@ -1,6 +1,7 @@
 using UnityEngine;
 using System.Collections.Generic;
 using static InteractFuncs;
+using static RifyDev.Utility;
 
 public class PlayerController : MonoBehaviour
 {
@@ -52,21 +53,22 @@ public class PlayerController : MonoBehaviour
 
     private void OnTriggerEnter(Collider other)
     {
-        // if the object is not in view of the camera do nothing
-        if(checkCameraVisibility(other.transform.position))
-            nearbyInteractableObjects.Add(other.gameObject);
+        nearbyInteractableObjects.Add(other.gameObject);
     }
 
     private void OnTriggerExit(Collider other)
     {
-        if (currentInteractableObject == other.gameObject && !checkCameraVisibility(other.transform.position))
+        if (currentInteractableObject == other.gameObject && !CheckCameraVisibility(camera, other.gameObject))
             currentInteractableObject = null;
         nearbyInteractableObjects.Remove(other.gameObject);
     }
 
     private void Interact()
     {
-        if (Input.GetMouseButton(0) && currentInteractableObject)
+        if (!currentInteractableObject || currentInteractableObject.tag == "Untagged")
+            return;
+
+        if (Input.GetMouseButton(0))
         {
             if (currentInteractableObject.tag == "Doorknob")
                 isDragging = true;
@@ -99,20 +101,34 @@ public class PlayerController : MonoBehaviour
 
     private void InteractionChecker()
     {
-        foreach (var obj in nearbyInteractableObjects)
+        // if the current interactable objects leaves camera space at any time, set it to null
+        if (currentInteractableObject && !CheckCameraVisibility(camera, currentInteractableObject))
+            currentInteractableObject = null;
+
+        if (nearbyInteractableObjects.Count <= 0)
+            return;
+
+        List<float> distances = new List<float>();
+        List<GameObject> objs = new List<GameObject>();
+
+        // get the distances from all nearby interactable objects
+        foreach(var obj in nearbyInteractableObjects)
         {
-            // shoot a ray to determine the closest interactable object
             Vector3 direction = obj.transform.position - camera.transform.position;
             RaycastHit hit;
-
-            if(Physics.Raycast(camera.transform.position, direction, out hit, interactionBubble.radius * 500.0f))
-                currentInteractableObject = hit.transform.gameObject;
+            bool test = Physics.Raycast(camera.transform.position, direction, out hit, interactionBubble.radius * 500.0f) && CheckCameraVisibility(camera, obj);
+            if(test)
+            {
+                distances.Add(hit.distance);
+                objs.Add(hit.transform.gameObject);
+            }
         }
-    }
 
-    private bool checkCameraVisibility(Vector3 pos)
-    {
-        Vector3 viewPos = camera.WorldToViewportPoint(pos);
-        return (viewPos.x >= 0 && viewPos.x <= 1 && viewPos.y >= 0 && viewPos.y <= 1 && viewPos.z > 0);
+        if(distances.Count <= 0 && objs.Count <= 0)
+            return;
+        
+        // sort through the distances to get the closest one to the player's camera
+        BubbleSortFGO(ref distances, ref objs);
+        currentInteractableObject = objs[0];
     }
 }
