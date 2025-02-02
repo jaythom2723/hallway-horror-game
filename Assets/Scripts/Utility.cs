@@ -19,12 +19,12 @@ namespace RifyDev
             {
                 for(int j = 0; j < size; j++)
                 {
-                    if(arr[j] > arr[j + 1])
-                    {
-                        float tmp = arr[j];
-                        arr[j] = arr[j + 1];
-                        arr[j + 1] = tmp;
-                    }
+                    if(arr[j] < arr[j + 1])
+                        continue;
+
+                    float tmp = arr[j];
+                    arr[j] = arr[j + 1];
+                    arr[j + 1] = tmp;
                 }
             }
 
@@ -38,12 +38,12 @@ namespace RifyDev
             {
                 for(int j = 0; j < size; j++)
                 {
-                    if(arr[j] > arr[j + 1])
-                    {
-                        float tmp = arr[j];
-                        arr[j] = arr[j + 1];
-                        arr[j + 1] = tmp;
-                    }
+                    if(arr[j] < arr[j + 1])
+                        continue;
+
+                    float tmp = arr[j];
+                    arr[j] = arr[j + 1];
+                    arr[j + 1] = tmp;
                 }
             }
         }
@@ -55,16 +55,16 @@ namespace RifyDev
             {
                 for(int j = 0; j < a.Count - 1; j++)
                 {
-                    if (a[j] > a[j + 1])
-                    {
-                        float ftmp = a[j];
-                        a[j] = a[j + 1];
-                        a[j + 1] = ftmp;
+                    if (a[j] < a[j + 1])
+                        continue;
 
-                        GameObject gotmp = b[j]; // lol "bj"
-                        b[j] = b[j + 1];
-                        b[j + 1] = gotmp;
-                    }
+                    float ftmp = a[j];
+                    GameObject gotmp = b[j];
+                    
+                    a[j] = a[j + 1];
+                    a[j + 1] = ftmp;
+                    b[j] = b[j + 1];
+                    b[j + 1] = gotmp;
                 }
             }
         }

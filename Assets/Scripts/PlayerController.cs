@@ -15,10 +15,16 @@ public class PlayerController : MonoBehaviour
         set { isDragging = value; }
     }
 
+    public bool Holding {
+        get { return isHolding; }
+        set { isHolding = value; }
+    }
+
     private float moveSpeed = 5f;
     private float mouseSensitivity = 2f;
 
     private bool isDragging = false;
+    private bool isHolding = false;
 
     private CharacterController controller;
 
@@ -68,15 +74,20 @@ public class PlayerController : MonoBehaviour
         if (!currentInteractableObject || currentInteractableObject.tag == "Untagged")
             return;
 
-        if (Input.GetMouseButton(0))
-        {
-            if (currentInteractableObject.tag == "Doorknob")
-                isDragging = true;
+        // if (currentInteractableObject.tag == "Doorknob" && Input.GetMouseButton(0))
+        // {
+        //     isDragging = true;
+        // } else if(currentInteractableObject.tag != "Doorknob" && Input.GetMouseButtonDown(0))
+        // {
+        //     isHolding = true;
+        // } else
+        // {
+        //     isHolding = false;
+        //     isDragging = false;
+        // }
 
-            interactFuncs[currentInteractableObject.tag](currentInteractableObject, gameObject);
-        } else {
-            isDragging = false;
-        }
+        interactFuncs[currentInteractableObject.tag](currentInteractableObject, gameObject);
+        Debug.Log(isDragging);
     }
 
     private void PlayerMovement()
@@ -90,7 +101,7 @@ public class PlayerController : MonoBehaviour
         // player camera rotation
         // TODO: linearly interpolate the camera rotation
         // ^ polishing phase
-        if (!isDragging) 
+        if (!isDragging && !isHolding) 
         {
             float mouseX = Input.GetAxis("Mouse X") * mouseSensitivity;
             float mouseY = Input.GetAxis("Mouse Y") * mouseSensitivity;

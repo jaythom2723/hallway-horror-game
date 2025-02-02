@@ -7,47 +7,54 @@ public static class InteractFuncs
 
     public static void InteractDoorknob(GameObject obj, GameObject ply)
     {
-        float mouseY = -Input.GetAxis("Mouse Y");
-        float pushForce = 5.0f;
+        PlayerController pc = ply.GetComponent<PlayerController>();
+        pc.Dragging = Input.GetMouseButton(0);
+        if(!pc.Dragging)
+            return;
 
-        Debug.Log(pushForce * mouseY);
+        float mouseY = Input.GetAxis("Mouse Y");
+        float pushForce = 5.0f;
 
         Rigidbody rb = obj.GetComponent<Rigidbody>();
 
-        rb.AddForce(new Vector3(pushForce * mouseY, 0.0f, 0.0f));
+        rb.AddForce(obj.transform.forward * (pushForce * mouseY));
     }
 
     // the inspection system before an item gets shipped to its designated area.
-    private static void GeneralInteract(GameObject obj, GameObject ply)
+    private static bool GeneralInteract(GameObject obj, GameObject ply)
     {
-
+        return false;
     }
 
     public static void InteractKey(GameObject obj, GameObject ply)
     {
-        GeneralInteract(obj, ply);
+        if(!GeneralInteract(obj, ply))
+            return;
 
-        Debug.Log("Key");
+        // Debug.Log("Key");
     }
 
     public static void InteractNote(GameObject obj, GameObject ply)
     {
-        GeneralInteract(obj, ply);
-
-        Debug.Log("Note");
+        if(!GeneralInteract(obj, ply))
+            return;
+        
+        // Debug.Log("Note");
     }
 
     public static void InteractArtifact(GameObject obj, GameObject ply)
     {
-        GeneralInteract(obj, ply);
+        if(!GeneralInteract(obj, ply))
+            return;
 
-        Debug.Log("Artifact");
+        // Debug.Log("Artifact");
     }
 
     public static void InteractRelic(GameObject obj, GameObject ply)
     {
-        GeneralInteract(obj, ply);
+        if(!GeneralInteract(obj, ply))
+            return;
 
-        Debug.Log("Relic");
+        // Debug.Log("Relic");
     }
 }; 
