@@ -20,15 +20,20 @@ public class PlayerController : MonoBehaviour
         set { isHolding = value; }
     }
 
+    public Transform InteractPosition {
+        get { return interactPosition; }
+    }
+
     private float moveSpeed = 5f;
     private float mouseSensitivity = 2f;
 
     private bool isDragging = false;
     private bool isHolding = false;
 
-    private CharacterController controller;
-
     [SerializeField] private Camera camera;
+    [SerializeField] private Transform interactPosition;
+
+    private CharacterController controller;
 
     private SphereCollider interactionBubble;
     private List<GameObject> nearbyInteractableObjects;
@@ -48,6 +53,8 @@ public class PlayerController : MonoBehaviour
         interactFuncs.Add("Note", InteractNote);
         interactFuncs.Add("Artifact", InteractArtifact);
         interactFuncs.Add("Relic", InteractRelic);
+
+        InteractFuncs.pc = this;
     }
 
     void Update()
@@ -74,40 +81,31 @@ public class PlayerController : MonoBehaviour
         if (!currentInteractableObject || currentInteractableObject.tag == "Untagged")
             return;
 
-        // if (currentInteractableObject.tag == "Doorknob" && Input.GetMouseButton(0))
-        // {
-        //     isDragging = true;
-        // } else if(currentInteractableObject.tag != "Doorknob" && Input.GetMouseButtonDown(0))
-        // {
-        //     isHolding = true;
-        // } else
-        // {
-        //     isHolding = false;
-        //     isDragging = false;
-        // }
-
+        // moved mouse checking to GeneralInteract and InteractDoorknob
         interactFuncs[currentInteractableObject.tag](currentInteractableObject, gameObject);
-        Debug.Log(isDragging);
     }
 
     private void PlayerMovement()
     {
+        if (isHolding)
+            return;
+
         // player movement
         float moveX = Input.GetAxisRaw("Horizontal") * moveSpeed;
         float moveZ = Input.GetAxisRaw("Vertical") * moveSpeed;
         Vector3 move = transform.right * moveX + transform.forward * moveZ;
         controller.SimpleMove(move);
 
+        if (isDragging)
+            return;
+
         // player camera rotation
         // TODO: linearly interpolate the camera rotation
         // ^ polishing phase
-        if (!isDragging && !isHolding) 
-        {
-            float mouseX = Input.GetAxis("Mouse X") * mouseSensitivity;
-            float mouseY = Input.GetAxis("Mouse Y") * mouseSensitivity;
-            transform.Rotate(Vector3.up * mouseX);
-            camera.transform.Rotate(Vector3.left * mouseY);
-        }
+        float mouseX = Input.GetAxis("Mouse X") * mouseSensitivity;
+        float mouseY = Input.GetAxis("Mouse Y") * mouseSensitivity;
+        transform.Rotate(Vector3.up * mouseX);
+        camera.transform.Rotate(Vector3.left * mouseY);
     }
 
     private void InteractionChecker()
@@ -125,6 +123,9 @@ public class PlayerController : MonoBehaviour
         // get the distances from all nearby interactable objects
         foreach(var obj in nearbyInteractableObjects)
         {
+            if(!obj) // if the object has been deleted we don't want to iterate over it.
+                continue;
+
             Vector3 direction = obj.transform.position - camera.transform.position;
             RaycastHit hit;
             bool test = Physics.Raycast(camera.transform.position, direction, out hit, interactionBubble.radius * 500.0f) && CheckCameraVisibility(camera, obj);
